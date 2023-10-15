@@ -6,6 +6,6 @@ import pl.szajsjem.autonet.DB.entity.User;
 
 public interface TokenRepository
         extends JpaRepository<Token, Long> {
-    User findByToken(String token);
+    Token findByToken(String token);
     void removeByToken(String token);
 }

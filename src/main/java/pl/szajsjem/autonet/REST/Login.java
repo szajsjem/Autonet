@@ -1,5 +1,6 @@
 package pl.szajsjem.autonet.REST;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import pl.szajsjem.autonet.DB.entity.Token;
@@ -17,6 +18,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.random.RandomGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 @RestController
 public class Login {
@@ -39,15 +42,15 @@ public class Login {
         }
         if (u == null) return "{\"ok\":\"false\",\"data\":{\"message\":\"missing login or email\"}}";
         if(!u.getPassword().equals(passhash(u.getSalt(),map.get("password"))))return "{\"ok\":\"false\",\"data\":{\"message\":\"invalid password\"}}";
-        String token = RandomString(40);
+        String token = randomString(40);
         while (tokens.findByToken(token) != null) {
-            token = RandomString(40);
+            token = randomString(40);
         }
         tokens.save(new Token(token, u));
         return "{\"ok\":\"true\",\"data\":{\"token\":\""+token+"\"}}";
     }
     @DeleteMapping("/api/user/logout")
-    void forceLogout(@RequestParam String key) {
+    void logout(@RequestParam String key) {
         if(tokens.findByToken(key)!=null)
             tokens.removeByToken(key);
     }
@@ -71,9 +74,22 @@ public class Login {
         users.save(new User(0L,map.get("login"),passhash(salt,map.get("password")),salt,map.get("email"),false,new HashSet<>()));
         return "{\"ok\":\"true\"}";
     }
+    @GetMapping("/api/user/check")
+    String check(@RequestParam String key) {
+        if(tokens.findByToken(key)!=null)return "{\"ok\":\"true\"}";
+        return "{\"ok\":\"false\"}";
+    }
+    @GetMapping("/api/user/info")
+    String info(@RequestParam String key) throws JsonProcessingException {
+        if(tokens.findByToken(key)!=null) {
+            return "{\"ok\":\"true\"," +
+                    "\"data\":" + new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(tokens.findByToken(key).getUser()) + "}";
+        }
+        return "{\"ok\":\"false\"}";
+    }
 
 
-    private String RandomString(final int i) {
+    private String randomString(final int i) {
         String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         StringBuilder sb = new StringBuilder(i);
         for (int j = 0; j < i; j++) {
