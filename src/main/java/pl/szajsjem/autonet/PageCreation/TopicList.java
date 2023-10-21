@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pl.szajsjem.autonet.DB.NginxCache;
 import pl.szajsjem.autonet.PageCreation.LLM.LLM;
@@ -25,10 +26,14 @@ public class TopicList {
     public ResponseEntity<String> getTopicList(@PathVariable String path) {
         LLM llm = LLMFactory.getLLM("GPT3.5");
         assert llm != null;
-        String topicList = llm.completeText("You are a api that returns a basic http page with a list of topics with a link to each topic starting like \"/wiki/{topic}\"",
+        String topicList = llm.completeText("You are a api that returns a basic http page with a list of topics that match the search query with a link to each topic starting like \"/wiki/{topic}\"",
                 "<html><body><p>topics matched with page:"+path+"</p><br><ul><li><a href=\"/wiki/");
         NginxCache.addTopicCache(path,topicList);
         return new ResponseEntity<>(topicList, HttpStatus.OK);
+    }
+    @GetMapping("/topic")
+    public ResponseEntity<String> getTopic(@RequestParam String search) {
+        return getTopicList(search);
     }
 
 }

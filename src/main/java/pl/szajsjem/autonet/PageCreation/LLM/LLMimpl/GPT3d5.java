@@ -10,11 +10,11 @@ public class GPT3d5 implements LLM {
     @Override
     public String completeText(String systemText, String retBegining) {
         CompletionRequest completionRequest = CompletionRequest.builder()
-                .model("gpt-3.5-turbo")
+                .model("gpt-3.5-turbo-instruct")
                 .prompt(systemText+"\n"+retBegining)
                 .echo(false)
                 .n(1)
-                .maxTokens(256)
+                .maxTokens(512)
                 .temperature(0.7)
                 .build();
         String response = service.createCompletion(completionRequest).getChoices().get(0).getText();
