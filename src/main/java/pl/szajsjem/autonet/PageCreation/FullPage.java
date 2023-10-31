@@ -81,7 +81,7 @@ public class FullPage {
                 function logout() {
                   fetchData('/api/logout', (status) => {
                     window.location.href = '/';
-                  }
+                  });
                 }
 
                 updateNavbar();

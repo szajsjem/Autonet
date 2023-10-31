@@ -49,7 +49,7 @@
     function logout() {
       fetchData('/api/logout', (status) => {
         window.location.href = '/';
-      }
+      });
     }
 
     updateNavbar();
