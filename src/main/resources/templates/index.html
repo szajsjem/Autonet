@@ -7,6 +7,53 @@
     }
 </style></head>
 <body>
+<nav id="topNavbar">
+    <!-- Navbar content will be updated here -->
+</nav>
+<script>
+    function fetchData(url, callback) {
+      fetch(url)
+        .then(response => response.json())
+        .then(data => callback(data))
+        .catch(error => console.error('Error:', error));
+    }
+
+    function updateNavbar() {
+      const navbar = document.getElementById('topNavbar');
+      fetchData('/api/testlogin', (loginStatus) => {
+        if (loginStatus.loggedIn) {
+          fetchData('/api/user', (userData) => {
+            navbar.innerHTML = `
+              <span>Welcome, ${userData.username}!</span>
+              <button onclick="goToProfile()">Profile</button>
+              <button onclick="logout()">Logout</button>
+            `;
+          });
+        } else {
+          navbar.innerHTML = `
+            <button onclick="goToLogin()">Login</button>
+            <button onclick="goToRegister()">Register</button>
+          `;
+        }
+      });
+    }
+    function goToLogin() {
+      window.location.href = '/login';
+    }
+    function goToRegister() {
+      window.location.href = '/register';
+    }
+    function goToProfile() {
+      window.location.href = '/profile';
+    }
+    function logout() {
+      fetchData('/api/logout', (status) => {
+        window.location.href = '/';
+      }
+    }
+
+    updateNavbar();
+  </script>
 <form action="/wiki" method="get">
     Input:<input align="center" type="text" name="search" />
     <input type="submit" value="Go to wiki"/>
