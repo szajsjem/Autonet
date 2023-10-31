@@ -18,8 +18,8 @@ public class FullPage {
     public ResponseEntity<String> preparePage(String path) {
         LLM llm = LLMFactory.getLLM("GPT3.5");
         assert llm != null;
-        String wikiPage = llm.completeText("You are a api that returns a basic http page with a wiki-like layout, add links to other pages within the wiki like \"/wiki/{page about}\"",
-                "<html><body><p>Page about:"+path+"</p><br>");
+        String wikiPage = llm.completeText("Create a html document with content that matches the following URL path: "+path+"\nAdd href links with relative paths to related topics",
+                "<!DOCTYPE html>\n<html>\n<head>\n<title>AI wiki</title>\n</head>\n<body>\n");
         NginxCache.addPageCache(path,wikiPage);
         return new ResponseEntity<>(wikiPage, HttpStatus.OK);
     }
@@ -27,11 +27,10 @@ public class FullPage {
     @GetMapping("/wiki/**")
     public ResponseEntity<String> getWikiPage(HttpServletRequest request) {
         String path = request.getRequestURI();
-        path = path.replace("/wiki/","");
         return preparePage(path);
     }
     @GetMapping("/wiki")
     public ResponseEntity<String> getWiki(@RequestParam String search) {
-        return preparePage(search);
+        return preparePage("/wiki/"+search);
     }
 }

@@ -7,9 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class AutonetApplication {
 
 	public static void main(String[] args) {
-		System.getenv().forEach((k, v) -> {
-			System.out.println(k + ":" + v);
-		});
 		SpringApplication.run(AutonetApplication.class, args);
 	}
 

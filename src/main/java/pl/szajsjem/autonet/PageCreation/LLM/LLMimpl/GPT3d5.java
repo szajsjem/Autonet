@@ -15,7 +15,7 @@ public class GPT3d5 implements LLM {
                 .echo(false)
                 .n(1)
                 .maxTokens(512)
-                .temperature(0.7)
+                .temperature(0.2)
                 .build();
         String response = service.createCompletion(completionRequest).getChoices().get(0).getText();
         return retBegining+ response;
