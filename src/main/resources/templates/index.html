@@ -1,10 +1,77 @@
 <head>
-<style>
-    form {
-    width: 50%;
-    margin-left : 25%;
+    <style>
+  /* Body Styles */
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
     text-align: center;
-    }
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Header Styles */
+  h2 {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    margin: 0;
+  }
+
+  /* Navbar Styles */
+  #topNavbar {
+    background-color: #4285F4; /* Background color for the navbar */
+    border-bottom: 2px solid #357ABD; /* Bottom border to separate navbar from content */
+    padding: 10px;
+  }
+
+  #topNavbar button {
+    background-color: #fff; /* Button background color in the navbar */
+    color: #4285F4; /* Button text color in the navbar */
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+
+  #topNavbar button:hover {
+    background-color: #ddd; /* Button background color on hover */
+  }
+
+  /* Form Styles */
+  form {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 300px;
+    text-align: center;
+  }
+
+  /* Input Styles */
+  input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: none;
+  }
+
+  input[type="submit"] {
+    background-color: #4285F4; /* Change to your desired color */
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  input[type="submit"]:hover {
+    background-color: #357ABD; /* Change to your desired hover color */
+  }
 </style></head>
 <body>
 <nav id="topNavbar">
@@ -17,14 +84,30 @@
         .then(data => callback(data))
         .catch(error => console.error('Error:', error));
     }
+    function fetchPost(url, callback) {
+      fetch(url, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => callback(data))
+        .catch(error => console.error('Error:', error));
+    }
+    function fetchDelete(url, callback) {
+      fetch(url, {
+            method: 'DELETE'
+        })
+        .then(data => callback(data))
+        .catch(error => console.error('Error:', error));
+    }
+
 
     function updateNavbar() {
       const navbar = document.getElementById('topNavbar');
-      fetchData('/api/testlogin', (loginStatus) => {
-        if (loginStatus.loggedIn) {
+      fetchData('/api/user/testlogin', (loginStatus) => {
+        if (loginStatus.ok === true) {
           fetchData('/api/user', (userData) => {
             navbar.innerHTML = `
-              <span>Welcome, ${userData.username}!</span>
+              <span>Welcome, ${userData.data.login}!</span>
               <button onclick="goToProfile()">Profile</button>
               <button onclick="logout()">Logout</button>
             `;
@@ -47,9 +130,9 @@
       window.location.href = '/profile';
     }
     function logout() {
-      fetchData('/api/logout', (status) => {
-        window.location.href = '/';
-      });
+        fetchDelete('/api/user/logout',(data)=>{
+            window.location.href = '/';
+        });
     }
 
     updateNavbar();

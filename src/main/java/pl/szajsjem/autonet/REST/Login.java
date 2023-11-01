@@ -1,8 +1,13 @@
 package pl.szajsjem.autonet.REST;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import pl.szajsjem.autonet.DB.entity.Token;
 import pl.szajsjem.autonet.DB.entity.User;
 import pl.szajsjem.autonet.DB.jpa.TokenRepository;
@@ -31,7 +36,7 @@ public class Login {
     @PostMapping("/api/user/login")
     String login(@RequestBody Map<String,String> map) throws NoSuchAlgorithmException, InvalidKeySpecException {
         User u = null;
-        if(!map.containsKey("password"))return "{\"ok\":\"false\",\"data\":{\"message\":\"missing password\"}}";
+        if(!map.containsKey("password"))return "{\"ok\":false,\"data\":{\"message\":\"missing password\"}}";
         if (map.containsKey("login")) {
             u = users.findByLogin(map.get("login"));
             if (u == null)
@@ -40,52 +45,76 @@ public class Login {
         else if (map.containsKey("email")) {
             u = users.findByEmail(map.get("email"));
         }
-        if (u == null) return "{\"ok\":\"false\",\"data\":{\"message\":\"missing login or email\"}}";
-        if(!u.getPassword().equals(passhash(u.getSalt(),map.get("password"))))return "{\"ok\":\"false\",\"data\":{\"message\":\"invalid password\"}}";
+        if (u == null) return "{\"ok\":false,\"data\":{\"message\":\"missing username or email\"}}";
+        if(!u.getPassword().equals(passhash(u.getSalt(),map.get("password"))))return "{\"ok\":false,\"data\":{\"message\":\"invalid password\"}}";
         String token = randomString(40);
         while (tokens.findByToken(token) != null) {
             token = randomString(40);
         }
         tokens.save(new Token(token, u));
-        return "{\"ok\":\"true\",\"data\":{\"token\":\""+token+"\"}}";
+
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        HttpSession session = attr.getRequest().getSession();
+        session.setAttribute("token", token);
+
+        return "{\"ok\":true,\"data\":{\"token\":\""+token+"\"}}";
     }
+    @Transactional
     @DeleteMapping("/api/user/logout")
-    void logout(@RequestParam String key) {
+    void logout(@RequestParam(required = false) String key) {
+        if(key==null){
+            ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+            HttpSession session = attr.getRequest().getSession();
+            key = (String) session.getAttribute("token");
+        }
+        if(key==null)return;
         if(tokens.findByToken(key)!=null)
             tokens.removeByToken(key);
     }
 
     @PostMapping("/api/user/register")
     String register(@RequestBody Map<String,String> map) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        if(map.isEmpty())return "fu";
-        if(!map.containsKey("login"))return "dodaj login w wywołaniu";
-        if(!map.containsKey("password"))return "dodaj haslo w wywołaniu";
-        if(!map.containsKey("email"))return "dodaj email w wywołaniu";
-        if(users.findByLogin(map.get("login"))!=null)return "login jest już zajęty";
-        if(users.findByEmail(map.get("email"))!=null)return "email jest już wykorzystany";
-        if(map.get("password").length()<3)return "hasło jest za krótkie";
-        if(map.get("login").length()<3)return "login jest za krótki";
-        if(map.get("email").length()<3)return "email jest za krótki";
-        if(!map.get("email").contains("@"))return "email bez małpy?";
-        if(!map.get("email").contains("."))return "email bez kropki?";
+        if(map.isEmpty())return "{\"ok\":false,\"data\":{\"message\":\"Hello there\"}}";
+        if(!map.containsKey("login"))return "{\"ok\":false,\"data\":{\"message\":\"missing username\"}}";
+        if(!map.containsKey("password"))return "{\"ok\":false,\"data\":{\"message\":\"missing password\"}}";
+        if(!map.containsKey("email"))return "{\"ok\":false,\"data\":{\"message\":\"missing email\"}}";
+        if(users.findByLogin(map.get("login"))!=null)return "{\"ok\":false,\"data\":{\"message\":\"username is already taken\"}}";
+        if(users.findByEmail(map.get("email"))!=null)return "{\"ok\":false,\"data\":{\"message\":\"email is already in use\"}}";
+        if(map.get("password").length()<3)return "{\"ok\":false,\"data\":{\"message\":\"password is too short\"}}";
+        if(map.get("login").length()<3)return "{\"ok\":false,\"data\":{\"message\":\"username is too short\"}}";
+        if(map.get("email").length()<3)return "{\"ok\":false,\"data\":{\"message\":\"email is too short\"}}";
+        if(!map.get("email").contains("@"))return "{\"ok\":false,\"data\":{\"message\":\"invalid email\"}}";
+        if(!map.get("email").contains("."))return "{\"ok\":false,\"data\":{\"message\":\"invalid email\"}}";
         byte[] salt=new byte[16];
         for(int i=0;i<16;i++)
-            salt[i]= ((byte) (Math.random()*255));
+            salt[i]= ((byte) (Math.random()*256));
         users.save(new User(0L,map.get("login"),passhash(salt,map.get("password")),salt,map.get("email"),false,new HashSet<>()));
-        return "{\"ok\":\"true\"}";
+        return "{\"ok\":true}";
     }
-    @GetMapping("/api/user/check")
-    String check(@RequestParam String key) {
-        if(tokens.findByToken(key)!=null)return "{\"ok\":\"true\"}";
-        return "{\"ok\":\"false\"}";
+    @GetMapping("/api/user/testlogin")
+    String check(@RequestParam(required = false) String key) {
+        if(key==null){
+            ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+            HttpSession session = attr.getRequest().getSession();
+            key = (String) session.getAttribute("token");
+        }
+        if(key==null)return "{\"ok\":false}";
+        if(tokens.findByToken(key)!=null)return "{\"ok\":true}";
+        return "{\"ok\":false}";
     }
-    @GetMapping("/api/user/info")
-    String info(@RequestParam String key) throws JsonProcessingException {
+    @GetMapping("/api/user")
+    String info(@RequestParam(required = false) String key) throws JsonProcessingException {
+        if(key==null){
+                ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+                HttpSession session = attr.getRequest().getSession();
+                key = (String) session.getAttribute("token");
+        }
+        if(key==null)return "{\"ok\":false}";
         if(tokens.findByToken(key)!=null) {
-            return "{\"ok\":\"true\"," +
+            return "{\"ok\":true," +
                     "\"data\":" + new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(tokens.findByToken(key).getUser()) + "}";
         }
-        return "{\"ok\":\"false\"}";
+        return "{\"ok\":false}";
     }
 
 

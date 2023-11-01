@@ -2,6 +2,64 @@
 <html>
 <head>
     <title>Registration Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h2 {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+
+        form {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 300px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button[type="submit"] {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #555;
+        }
+
+        #registrationMessage {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
 <h2>Registration Form</h2>
@@ -31,9 +89,9 @@
       const password = form.password.value;
 
       const data = {
-        username,
-        email,
-        password
+        login: username,
+        email: email,
+        password: password
       };
 
       // Make a POST request to /api/user/register
@@ -50,6 +108,7 @@
         if (result.ok === true) {
           // Registration successful
           messageDiv.innerHTML = 'Registration successful.';
+          window.location.href = '/login';
         } else {
           // Registration failed, display the error message
           messageDiv.innerHTML = `Registration failed: ${result.data.message}`;
