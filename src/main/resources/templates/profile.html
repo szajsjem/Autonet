@@ -62,7 +62,16 @@
     </style>
 </head>
 <body>
-
+<script>
+    function updateNavbar() {
+        const navbar = document.getElementById('topNavbar');
+        fetchData('/api/user/testlogin', (loginStatus) => {
+            if (loginStatus.ok === false) {
+                window.location.href = '/login';
+            }
+        });
+    }
+</script>
 <h2>Your data</h2>
 
 
