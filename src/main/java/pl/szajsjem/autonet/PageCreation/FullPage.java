@@ -1,6 +1,8 @@
 package pl.szajsjem.autonet.PageCreation;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -8,30 +10,56 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import pl.szajsjem.autonet.DB.NginxCache;
+import pl.szajsjem.autonet.DB.entity.Token;
+import pl.szajsjem.autonet.DB.entity.User;
+import pl.szajsjem.autonet.DB.jpa.TokenRepository;
+import pl.szajsjem.autonet.DB.jpa.UserRepository;
 import pl.szajsjem.autonet.PageCreation.LLM.LLM;
 import pl.szajsjem.autonet.PageCreation.LLM.LLMFactory;
+import pl.szajsjem.autonet.REST.Profile;
 
 @Controller
 public class FullPage {
+    @Autowired
+    private UserRepository users;
+    @Autowired
+    private TokenRepository tokens;
 
-    final String systemPrompt= """
-            Given the full URL, please perform the following tasks:
-            1. *Extract and Summarize Content:* Retrieve the content from the specified URL and create a concise summary that captures the main points and purpose of the page. Ensure the summary is structured with a clear introduction, body, and conclusion reflecting the original content's organization.
-            2. *Identify Relevant Links:* As you create the summary, identify key concepts and topics that are extensively discussed on the page. For each of these, find relevant internal links (links to other pages within the same domain) that provide additional context or further information.
-            3. *Insert Contextual Links:* Embed these links seamlessly into the summary text where they naturally fit. The anchor text for each link should be informative and indicate the linked page's content, maintaining the coherence and context of the original page.
-            4. *Maintain Original Context:* Be careful to preserve the original context of the page. Do not insert links that could mislead or take the reader on a tangent unrelated to the primary focus of the original content.
-            Please provide the summary along with the contextually embedded links in html format.
-            """;
-    final String userRequest= """
-            AI, I am providing you with the full URL of a webpage: $$URL$$. Based on your knowledge up to 2023, please generate a concise summary of the main content of this page, not exceeding 300 words. The summary should capture the key points and themes of the original content. Additionally, incorporate up to five relevant hyperlinks within the summary that enhance the reader's understanding without detracting from the core context of the page. These can be either important internal links to other sections of the same website or external links to authoritative sources that offer additional information on the topics covered. Ensure that the summary remains coherent and flows naturally with the inserted hyperlinks.
-            """;
+    public ResponseEntity<String> preparePage(String path, String key) throws Exception {
+        if(key==null){
+            ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+            HttpSession session = attr.getRequest().getSession();
+            key = (String) session.getAttribute("token");
+        }
+        String model=null, system=null, user=null;
+        if(key!=null){
+            Token t = tokens.findByToken(key);
+            if(t != null){
+                model = t.getUser().getSelectedModel();
+                system = t.getUser().getPageGenSystemText();
+                user = t.getUser().getPageGenUserText();
+            }
+        }
 
-    public ResponseEntity<String> preparePage(String path) {
-        LLM llm = LLMFactory.getLLM("GPT3.5");
+        if(model==null)
+            model = Profile.getDefaultModel();
+        if(system==null)
+            system = Profile.getDefaultSystemPrompt();
+        if(user==null)
+            user = Profile.getDefaultUserRequest();
+
+        LLM llm = LLMFactory.getLLM(model);
         assert llm != null;
-        String wikiPage = llm.completeText("Create a html document with content that matches the following URL path: "+path+"\nAdd href links with relative paths to related topics",
-                "<!DOCTYPE html>\n<html>\n<head>\n<title>AI wiki</title>\n</head>\n<body>\n");
+        //String wikiPage = llm.completeText("Create a html document with content that matches the following URL path: "+path+"\nAdd href links with relative paths to related topics",
+        //        "<!DOCTYPE html>\n<html>\n<head>\n<title>AI wiki</title>\n</head>\n<body>\n");
+        var splitusermessage = user.split("\\$\\$URL\\$\\$");
+        if(splitusermessage.length!=2)
+            return new ResponseEntity<>("invalid use of $$URL$$", HttpStatus.OK);
+        String userMessage = splitusermessage[0] + path + splitusermessage[1]+"\nPlease start relative links with /wiki/(main topic)/(subtopic) and start your response with:\n<!DOCTYPE html>\n<html>\n<head>\n<title>AI wiki</title>\n</head>\n<body>\n";
+        String wikiPage = llm.chat(new String[]{system,user});
         String[] spl = wikiPage.split("</head>\n<body>");
         wikiPage = spl[0]+navigation+spl[1];
         NginxCache.addPageCache(path,wikiPage);
@@ -39,13 +67,14 @@ public class FullPage {
     }
 
     @GetMapping("/wiki/**")
-    public ResponseEntity<String> getWikiPage(HttpServletRequest request) {
+    public ResponseEntity<String> getWikiPage(HttpServletRequest request) throws Exception {
         String path = request.getRequestURI();
-        return preparePage(path);
+        String key = request.getParameter("key");
+        return preparePage(path,key);
     }
     @GetMapping("/wiki")
-    public ResponseEntity<String> getWiki(@RequestParam String search) {
-        return preparePage("/wiki/"+search);
+    public ResponseEntity<String> getWiki(@RequestParam String search,@RequestParam(required = false) String key) throws Exception {
+        return preparePage("/wiki/"+search,key);
     }
 
 
