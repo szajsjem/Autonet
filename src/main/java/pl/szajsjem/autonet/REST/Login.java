@@ -61,7 +61,7 @@ public class Login {
     }
     @Transactional
     @DeleteMapping("/api/user/logout")
-    void logout(@RequestParam(required = false) String key) {
+    public void logout(@RequestParam(required = false) String key) {
         if(key==null){
             ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
             HttpSession session = attr.getRequest().getSession();
@@ -88,7 +88,7 @@ public class Login {
         byte[] salt=new byte[16];
         for(int i=0;i<16;i++)
             salt[i]= ((byte) (Math.random()*256));
-        users.save(new User(0L,map.get("login"),passhash(salt,map.get("password")),salt,map.get("email"),false,new HashSet<>()));
+        users.save(new User(0L,map.get("login"),passhash(salt,map.get("password")),salt,map.get("email"),false,new HashSet<>(),null,null,null));
         return "{\"ok\":true}";
     }
     @GetMapping("/api/user/testlogin")
@@ -100,20 +100,6 @@ public class Login {
         }
         if(key==null)return "{\"ok\":false}";
         if(tokens.findByToken(key)!=null)return "{\"ok\":true}";
-        return "{\"ok\":false}";
-    }
-    @GetMapping("/api/user")
-    String info(@RequestParam(required = false) String key) throws JsonProcessingException {
-        if(key==null){
-                ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-                HttpSession session = attr.getRequest().getSession();
-                key = (String) session.getAttribute("token");
-        }
-        if(key==null)return "{\"ok\":false}";
-        if(tokens.findByToken(key)!=null) {
-            return "{\"ok\":true," +
-                    "\"data\":" + new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(tokens.findByToken(key).getUser()) + "}";
-        }
         return "{\"ok\":false}";
     }
 

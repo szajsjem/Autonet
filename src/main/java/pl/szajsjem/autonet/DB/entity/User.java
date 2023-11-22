@@ -23,4 +23,7 @@ public class User {
     @JsonIgnore
     @OneToMany
     private Set<Token> tokens;
+    private String SelectedModel;
+    private String PageGenSystemText;
+    private String PageGenUserText;
 }

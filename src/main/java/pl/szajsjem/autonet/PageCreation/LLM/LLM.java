@@ -2,7 +2,7 @@ package pl.szajsjem.autonet.PageCreation.LLM;
 
 public interface LLM {
     String completeText(String systemText, String retBegining);
-    String chat(String[] messages);
+    String chat(String[] messages) throws Exception;
     String name();
 
 }
