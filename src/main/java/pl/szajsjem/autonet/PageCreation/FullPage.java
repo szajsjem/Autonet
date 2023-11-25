@@ -75,7 +75,7 @@ public class FullPage {
         String key = request.getParameter("key");
         return preparePage(path,key);
     }
-    @GetMapping("/wiki")
+    @GetMapping("/topic")
     public ResponseEntity<String> getWiki(@RequestParam String search) throws Exception {
         return new ResponseEntity<>("""
                             <!DOCTYPE html>
