@@ -37,14 +37,14 @@ public class GPT3d5 implements LLM {
         messages.add(systemMessage);
         for(int i=1;i<message.length;i++) {
             final ChatMessage userMessage = new ChatMessage(ChatMessageRole.USER.value(), message[i]);
-            messages.add(systemMessage);
+            messages.add(userMessage);
         }
         ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest
                 .builder()
                 .model("gpt-3.5-turbo")
                 .messages(messages)
                 .n(1)
-                .maxTokens(512)
+                .maxTokens(2048)
                 .logitBias(new HashMap<>())
                 .build();
         String response = service.createChatCompletion(chatCompletionRequest).getChoices().get(0).getMessage().getContent();

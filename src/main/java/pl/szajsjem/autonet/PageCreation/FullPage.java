@@ -6,15 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import pl.szajsjem.autonet.DB.NginxCache;
 import pl.szajsjem.autonet.DB.entity.Token;
-import pl.szajsjem.autonet.DB.entity.User;
 import pl.szajsjem.autonet.DB.jpa.TokenRepository;
 import pl.szajsjem.autonet.DB.jpa.UserRepository;
 import pl.szajsjem.autonet.PageCreation.LLM.LLM;
@@ -53,108 +51,104 @@ public class FullPage {
 
         LLM llm = LLMFactory.getLLM(model);
         assert llm != null;
+        path = path.replace(' ','-');
         //String wikiPage = llm.completeText("Create a html document with content that matches the following URL path: "+path+"\nAdd href links with relative paths to related topics",
         //        "<!DOCTYPE html>\n<html>\n<head>\n<title>AI wiki</title>\n</head>\n<body>\n");
         var splitusermessage = user.split("\\$\\$URL\\$\\$");
         if(splitusermessage.length!=2)
-            return new ResponseEntity<>("invalid use of $$URL$$", HttpStatus.OK);
-        String userMessage = splitusermessage[0] + path + splitusermessage[1]+"\nPlease start relative links with /wiki/(main topic)/(subtopic) and start your response with:\n<!DOCTYPE html>\n<html>\n<head>\n<title>AI wiki</title>\n</head>\n<body>\n";
-        String wikiPage = llm.chat(new String[]{system,user});
-        String[] spl = wikiPage.split("</head>\n<body>");
+            return new ResponseEntity<>("invalid use of $$URL$$", HttpStatus.PARTIAL_CONTENT);
+        String userMessage = splitusermessage[0]+ path + splitusermessage[1]+"\nPlease start relative links with /wiki/(main topic)/(subtopic) and start your response with:\n<!DOCTYPE html>\n<html>\n<head>\n<title>(title)</title>\n</head>\n<body>\n";
+        String wikiPage = llm.chat(new String[]{system,userMessage});
+        String[] spl = wikiPage.split("<\\/head>\n<body>");
+        if(spl.length!=2){
+            return new ResponseEntity<>(wikiPage, HttpStatus.PARTIAL_CONTENT);
+        }
         wikiPage = spl[0]+navigation+spl[1];
         NginxCache.addPageCache(path,wikiPage);
         return new ResponseEntity<>(wikiPage, HttpStatus.OK);
     }
 
     @GetMapping("/wiki/**")
+    @Transactional(timeout = 100000)
     public ResponseEntity<String> getWikiPage(HttpServletRequest request) throws Exception {
         String path = request.getRequestURI();
         String key = request.getParameter("key");
         return preparePage(path,key);
     }
     @GetMapping("/wiki")
-    public ResponseEntity<String> getWiki(@RequestParam String search,@RequestParam(required = false) String key) throws Exception {
-        return preparePage("/wiki/"+search,key);
+    public ResponseEntity<String> getWiki(@RequestParam String search) throws Exception {
+        return new ResponseEntity<>("""
+                            <!DOCTYPE html>
+                            <html lang="en">
+                            <head>
+                                <meta charset="UTF-8">
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <style>
+                                    body {
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        height: 100vh;
+                                        margin: 0;
+                                    }
+                                
+                                    .loader {
+                                        border: 8px solid #f3f3f3;
+                                        border-top: 8px solid #3498db;
+                                        border-radius: 50%;
+                                        width: 50px;
+                                        height: 50px;
+                                        animation: spin 1s linear infinite;
+                                    }
+                                
+                                    @keyframes spin {
+                                        0% { transform: rotate(0deg); }
+                                        100% { transform: rotate(360deg); }
+                                    }
+                                </style>
+                                <title>Loading Spinner</title>
+                            </head>
+                            <body>
+                <script>
+                                                                        // Add a delay before redirecting
+                                                                        setTimeout(function() {
+                                                                            window.location.href = '/wiki/"""+search+
+        """
+';}, 1000);
+                            </script>
+                                <div class="loader"></div>
+                            </body>
+                            </html>
+                """, HttpStatus.OK);
     }
 
 
 
     static final String navigation = """
-            <style>
-              /* Body Styles */
-              body {
-                font-family: Arial, sans-serif;
-                background-color: #f2f2f2;
-                text-align: center;
-                margin: 0;
-                padding: 0;
-              }
-                        
-              /* Header Styles */
-              h2 {
-                background-color: #333;
-                color: #fff;
-                padding: 20px;
-                margin: 0;
-              }
-                        
-              /* Navbar Styles */
-              #topNavbar {
-                  background-color: #333;
-                  color: #fff;
-                border-bottom: 2px solid #357ABD; /* Bottom border to separate navbar from content */
-                padding: 10px;
-              }
-                        
-              #topNavbar button {
-                background-color: #fff; /* Button background color in the navbar */
-                color: #4285F4; /* Button text color in the navbar */
-                border: none;
-                border-radius: 5px;
-                padding: 10px 20px;
-                cursor: pointer;
-                margin-right: 10px;
-              }
-                        
-              #topNavbar button:hover {
-                background-color: #ddd; /* Button background color on hover */
-              }
-                        
-              /* Form Styles */
-              form {
-                background-color: #fff;
-                border: 1px solid #ccc;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                padding: 20px;
-                margin: 20px auto;
-                max-width: 300px;
-                text-align: center;
-              }
-                        
-              /* Input Styles */
-              input[type="text"] {
-                width: 100%;
-                padding: 10px;
-                margin: 10px 0;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-                box-shadow: none;
-              }
-                        
-              input[type="submit"] {
-                background-color: #4285F4; /* Change to your desired color */
-                color: #fff;
-                border: none;
-                border-radius: 5px;
-                padding: 10px 20px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-              }
-                        
-              input[type="submit"]:hover {
-                background-color: #357ABD; /* Change to your desired hover color */
-              }
-            </style></head>
+                <style>
+                         /* Navbar Styles */
+                         #topNavbar {
+                             background-color: #333;
+                             color: #fff;
+                           border-bottom: 2px solid #357ABD; /* Bottom border to separate navbar from content */
+                           padding: 10px;
+                         }
+                       
+                         #topNavbar button {
+                           background-color: #fff; /* Button background color in the navbar */
+                           color: #4285F4; /* Button text color in the navbar */
+                           border: none;
+                           border-radius: 5px;
+                           padding: 10px 20px;
+                           cursor: pointer;
+                           margin-right: 10px;
+                         }
+                       
+                         #topNavbar button:hover {
+                           background-color: #ddd; /* Button background color on hover */
+                         }
+                </style>
+            </head>
             <body>
             <nav id="topNavbar">
                            <!-- Navbar content will be updated here -->

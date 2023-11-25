@@ -14,7 +14,7 @@ import java.time.Duration;
 
 public class LLMFactory {
     static String token = System.getenv("OPENAI_TOKEN");
-    static OpenAiService service = new OpenAiService(token, Duration.ofSeconds(30));
+    static OpenAiService service = new OpenAiService(token, Duration.ofSeconds(0));
     public static LLM getLLM(String type) {
         if (type.equals("GPT3.5")) {
             return new GPT3d5(service);

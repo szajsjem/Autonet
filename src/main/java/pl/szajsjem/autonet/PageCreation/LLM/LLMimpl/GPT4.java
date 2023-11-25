@@ -21,14 +21,12 @@ public class GPT4 implements LLM {
         final ChatMessage systemMessage = new ChatMessage(ChatMessageRole.SYSTEM.value(), systemText);
         messages.add(systemMessage);
         final ChatMessage userMessage = new ChatMessage(ChatMessageRole.USER.value(), message);
-        messages.add(systemMessage);
+        messages.add(userMessage);
         ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest
                 .builder()
                 .model("gpt-4-1106-preview")
                 .messages(messages)
-                .n(1)
-                .maxTokens(512)
-                .logitBias(new HashMap<>())
+                .maxTokens(2048)
                 .build();
         String response = service.createChatCompletion(chatCompletionRequest).getChoices().get(0).getMessage().getContent();
         return response;
