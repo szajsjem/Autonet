@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="pl">
 <head>
+    <meta charset="UTF-8">
     <title>Registration Form</title>
     <style>
         body {
@@ -59,19 +60,11 @@
         #registrationMessage {
             margin-top: 10px;
         }
+  <link rel="stylesheet" href="style.css">
     </style>
 </head>
 <body>
-<script>
-    function updateNavbar() {
-        const navbar = document.getElementById('topNavbar');
-        fetchData('/api/user/testlogin', (loginStatus) => {
-            if (loginStatus.ok === false) {
-                window.location.href = '/login';
-            }
-        });
-    }
-</script>
+<script src="scripts.js"></script>
 <h2>Your data</h2>
 
 

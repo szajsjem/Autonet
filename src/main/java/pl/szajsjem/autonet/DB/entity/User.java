@@ -11,7 +11,7 @@ import java.util.Set;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long userId  ;
+    private Long id  ;
     private String login ;
     @JsonIgnore
     private String password  ;
@@ -23,7 +23,6 @@ public class User {
     @JsonIgnore
     @OneToMany
     private Set<Token> tokens;
-    private String SelectedModel;
-    private String PageGenSystemText;
-    private String PageGenUserText;
+    @OneToOne
+    GenInstructions generationInstructions;
 }

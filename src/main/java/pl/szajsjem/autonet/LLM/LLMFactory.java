@@ -1,14 +1,9 @@
-package pl.szajsjem.autonet.PageCreation.LLM;
+package pl.szajsjem.autonet.LLM;
 
-import pl.szajsjem.autonet.PageCreation.LLM.LLMimpl.GPT3d5;
-import pl.szajsjem.autonet.PageCreation.LLM.LLMimpl.GPT4;
+import pl.szajsjem.autonet.LLM.LLMimpl.GPT3d5;
+import pl.szajsjem.autonet.LLM.LLMimpl.GPT4;
 
-import com.theokanning.openai.completion.chat.ChatCompletionRequest;
-import com.theokanning.openai.completion.chat.ChatMessage;
-import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.OpenAiService;
-import com.theokanning.openai.completion.CompletionRequest;
-import com.theokanning.openai.image.CreateImageRequest;
 
 import java.time.Duration;
 

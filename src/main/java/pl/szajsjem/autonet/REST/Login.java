@@ -51,7 +51,7 @@ public class Login {
         while (tokens.findByToken(token) != null) {
             token = randomString(40);
         }
-        tokens.save(new Token(token, u));
+        tokens.save(new Token(0L,token, u));
 
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpSession session = attr.getRequest().getSession();
@@ -88,7 +88,7 @@ public class Login {
         byte[] salt=new byte[16];
         for(int i=0;i<16;i++)
             salt[i]= ((byte) (Math.random()*256));
-        users.save(new User(0L,map.get("login"),passhash(salt,map.get("password")),salt,map.get("email"),false,new HashSet<>(),null,null,null));
+        users.save(new User(0L,map.get("login"),passhash(salt,map.get("password")),salt,map.get("email"),false,new HashSet<>(),null));
         return "{\"ok\":true}";
     }
     @GetMapping("/api/user/testlogin")

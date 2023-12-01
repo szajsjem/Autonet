@@ -1,4 +1,7 @@
+
+<html lang="pl">
 <head>
+    <meta charset="UTF-8">
     <style>
   /* Body Styles */
   body {
@@ -73,71 +76,17 @@
   input[type="submit"]:hover {
     background-color: #357ABD; /* Change to your desired hover color */
   }
+
+  <link rel="stylesheet" href="style.css">
 </style></head>
 <body>
 <nav id="topNavbar">
     <!-- Navbar content will be updated here -->
 </nav>
+<script src="scripts.js"></script>
 <script>
-    function fetchData(url, callback) {
-      fetch(url)
-        .then(response => response.json())
-        .then(data => callback(data))
-        .catch(error => console.error('Error:', error));
-    }
-    function fetchPost(url, callback) {
-      fetch(url, {
-            method: 'POST'
-        })
-        .then(response => response.json())
-        .then(data => callback(data))
-        .catch(error => console.error('Error:', error));
-    }
-    function fetchDelete(url, callback) {
-      fetch(url, {
-            method: 'DELETE'
-        })
-        .then(data => callback(data))
-        .catch(error => console.error('Error:', error));
-    }
-
-
-    function updateNavbar() {
-      const navbar = document.getElementById('topNavbar');
-      fetchData('/api/user/testlogin', (loginStatus) => {
-        if (loginStatus.ok === true) {
-          fetchData('/api/user', (userData) => {
-            navbar.innerHTML = `
-              <span>Welcome, ${userData.data.login}!</span>
-              <button onclick="goToProfile()">Profile</button>
-              <button onclick="logout()">Logout</button>
-            `;
-          });
-        } else {
-          navbar.innerHTML = `
-            <button onclick="goToLogin()">Login</button>
-            <button onclick="goToRegister()">Register</button>
-          `;
-        }
-      });
-    }
-    function goToLogin() {
-      window.location.href = '/login';
-    }
-    function goToRegister() {
-      window.location.href = '/register';
-    }
-    function goToProfile() {
-      window.location.href = '/profile';
-    }
-    function logout() {
-        fetchDelete('/api/user/logout',(data)=>{
-            window.location.href = '/';
-        });
-    }
-
     updateNavbar();
-  </script>
+</script>
 <form action="/topic" method="get">
     Topic:<input align="center" type="text" name="search" />
     <input type="submit" value="Go to wiki"/>

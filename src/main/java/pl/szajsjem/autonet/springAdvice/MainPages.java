@@ -21,4 +21,12 @@ public class MainPages {
     public String profile() {
         return "profile";
     }
+    @GetMapping("/topic")
+    public String topic() {
+        return "topic";
+    }
+    @GetMapping("/editor")
+    public String rditor() {
+        return "editor";
+    }
 }

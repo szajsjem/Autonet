@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import pl.szajsjem.autonet.DB.entity.GenInstructions;
 import pl.szajsjem.autonet.DB.entity.Token;
 import pl.szajsjem.autonet.DB.entity.User;
 import pl.szajsjem.autonet.DB.jpa.TokenRepository;
@@ -88,16 +89,33 @@ public class Profile {
         Token t = tokens.findByToken(key);
         if(t!=null) {
             User db = t.getUser();
-            User u = new User(null, db.getLogin(), null,null,db.getEmail(),false,null,db.getSelectedModel(), db.getPageGenSystemText() ,db.getPageGenUserText());
+            User u = new User(null, db.getLogin(), null,null,db.getEmail(),false,null,new GenInstructions());
 
-            if(u.getPageGenSystemText()==null){
-                u.setPageGenSystemText(defaultSystemPrompt);
+            GenInstructions g = db.getGenerationInstructions();
+            if (g != null) {
+                if (g.getPageGenSystemText() == null) {
+                    u.getGenerationInstructions().setPageGenSystemText(defaultSystemPrompt);
+                }
+                else{
+                    u.getGenerationInstructions().setPageGenSystemText(g.getPageGenSystemText());
+                }
+                if (g.getPageGenUserText() == null) {
+                    u.getGenerationInstructions().setPageGenUserText(defaultUserRequest);
+                }
+                else{
+                    u.getGenerationInstructions().setPageGenUserText(g.getPageGenUserText());
+                }
+                if (g.getSelectedModel() == null) {
+                    u.getGenerationInstructions().setSelectedModel(defaultModel);
+                }
+                else{
+                    u.getGenerationInstructions().setSelectedModel(g.getSelectedModel());
+                }
             }
-            if(u.getPageGenUserText()==null){
-                u.setPageGenUserText(defaultUserRequest);
-            }
-            if(u.getSelectedModel()==null){
-                u.setSelectedModel(defaultModel);
+            else{
+                u.getGenerationInstructions().setPageGenSystemText(defaultSystemPrompt);
+                u.getGenerationInstructions().setPageGenUserText(defaultUserRequest);
+                u.getGenerationInstructions().setSelectedModel(defaultModel);
             }
             return new ResponseEntity<>("{\"ok\":true," +
                     "\"data\":" + new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(u) + "}", HttpStatus.OK);
@@ -105,7 +123,7 @@ public class Profile {
         return new ResponseEntity<>("{\"ok\":false}", HttpStatus.OK);
     }
     @PutMapping("/api/user")
-    public ResponseEntity<String> updateInfo(@RequestParam(required = false) String key,@RequestBody User updated) throws JsonProcessingException {
+    public ResponseEntity<String> updateInfo(@RequestParam(required = false) String key,@RequestBody GenInstructions updated) throws JsonProcessingException {
         if(key==null){
             ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
             HttpSession session = attr.getRequest().getSession();
@@ -115,11 +133,12 @@ public class Profile {
         Token t = tokens.findByToken(key);
         if(t!=null) {
             User u = t.getUser();
-
-            u.setPageGenUserText(updated.getPageGenUserText());
-            u.setPageGenSystemText(updated.getPageGenSystemText());
-            u.setSelectedModel(updated.getSelectedModel());
-
+            GenInstructions g = u.getGenerationInstructions();
+            if(g!=null) {
+                g.setPageGenUserText(updated.getPageGenUserText());
+                g.setPageGenSystemText(updated.getPageGenSystemText());
+                g.setSelectedModel(updated.getSelectedModel());
+            }
             users.save(u);
             return new ResponseEntity<>("{\"ok\":true," +
                     "\"data\":" + new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(u) + "}", HttpStatus.OK);

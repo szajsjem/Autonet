@@ -1,0 +1,1 @@
+ssh -L25588:127.0.0.1:25588 pi@szajsjem.mooo.com -p 25567

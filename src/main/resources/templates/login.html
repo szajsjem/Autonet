@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="pl">
 <head>
+    <meta charset="UTF-8">
     <title>Login Form</title>
     <style>
         body {
@@ -59,6 +60,7 @@
         #registrationMessage {
             margin-top: 10px;
         }
+  <link rel="stylesheet" href="style.css">
     </style>
 </head>
 <body>
@@ -75,44 +77,6 @@
 
 <div id="loginMessage"></div>
 
-<script>
-    // Function to log in a user
-    function loginUser(event) {
-      event.preventDefault();
-
-      const form = document.getElementById('loginForm');
-      const username = form.username.value;
-      const password = form.password.value;
-
-      const data = {
-        login: username,
-        password: password
-      };
-
-      // Make a POST request to /api/user/login
-      fetch('/api/user/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      })
-      .then(response => response.json())
-      .then(result => {
-        const messageDiv = document.getElementById('loginMessage');
-        if (result.ok === true) {
-          // Login successful
-          messageDiv.innerHTML = 'Login successful.';
-          // Redirect to the user's profile or home page
-          // Replace '/profile' with your desired destination URL
-          window.location.href = '/';
-        } else {
-          // Login failed, display the error message
-          messageDiv.innerHTML = `Login failed: ${result.data.message}`;
-        }
-      })
-      .catch(error => console.error('Error:', error));
-    }
-  </script>
+<script src="scripts.js"></script>
 </body>
 </html>
