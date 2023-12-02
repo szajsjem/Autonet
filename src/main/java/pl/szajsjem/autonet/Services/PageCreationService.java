@@ -99,6 +99,7 @@ public class PageCreationService {
     });
 
     static final String navigation = """
+            <link rel="stylesheet" href="style.css">
             </head>
             <body>
             <script src="scripts.js"></script>

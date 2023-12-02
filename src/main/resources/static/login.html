@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+<nav id="topNavbar">
+</nav>
+<script src="scripts.js"></script>
+<script>
+    updateNavbar();
+</script>
+<h2>Login</h2>
+<form id="loginForm" onsubmit="loginUser(event)">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br>
+
+    <button type="submit">Login</button>
+</form>
+
+<div id="loginMessage"></div>
+<p>Need account? <a href="/register.html" id="register-link">Register</a></p>
+
+</body>
+</html>

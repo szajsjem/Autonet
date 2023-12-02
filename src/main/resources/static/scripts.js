@@ -48,22 +48,24 @@
         if (loginStatus.ok === true) {
           fetchData('/api/user', (userData) => {
             navbar.innerHTML = `
+              <a id="logo_href" href="#" onclick="goToMain()"><img src="logo.png" id="logo_img"></a>
               <span>Welcome, ${userData.data.login}!</span>
               <button onclick="goToProfile()">Profile</button>
               <button onclick="logout()">Logout</button>
-            `;
+            ` + getgenpagebuttons();
           });
         } else {
           navbar.innerHTML = `
-            <button onclick="goToLogin()">Login</button>
-            <button onclick="goToRegister()">Register</button>
-          `;
+              <a id="logo_href" href="#" onclick="goToMain()"><img src="logo.png" id="logo_img"></a>
+              <button onclick="goToLogin()">Login</button>
+              <button onclick="goToRegister()">Register</button>
+          ` + getgenpagebuttons();
         }
       });
     }
     function logout() {
         fetchDelete('/api/user/logout',(data)=>{
-            window.location.href = '/';
+            goToMain();
         });
     }
 
@@ -83,9 +85,33 @@
             const messageDiv = document.getElementById('loginMessage');
             if (result.ok === true) {
               messageDiv.innerHTML = 'Login successful.';
-              window.location.href = '/';
+              goToMain();
             } else {
               messageDiv.innerHTML = `Login failed: ${result.data.message}`;
+            }
+          });
+        }
+    function registerUser(event) {
+          event.preventDefault();
+
+          const form = document.getElementById('registrationForm');
+          const username = form.username.value;
+          const email = form.email.value;
+          const password = form.password.value;
+
+          const data = {
+            login: username,
+            email: email,
+            password: password
+          };
+
+          fetchPost('/api/user/register',data, result => {
+            const messageDiv = document.getElementById('registrationMessage');
+            if (result.ok === true) {
+              messageDiv.innerHTML = 'Registration successful.';
+              goToLogin();
+            } else {
+              messageDiv.innerHTML = `Registration failed: ${result.data.message}`;
             }
           });
         }
@@ -98,15 +124,37 @@
     function requestPage(){
 
     }
-    function goToGenerated(){
+    function updatePage(){
 
     }
+    function getgenpagebuttons(){
+        if(window.location.href.includes('/wiki/'))
+            return `
+                    <button onclick="goToEdit()">Edit</button>
+                    <button onclick="goToLogs()">Logs</button>
+                    `;
+        return '';
+    }
+
+
+
+
+    function goToGenerated(){
+        //while tru get isgenerated
+        //if gen goto /wiki/**
+    }
+    function goToEdit(){
+        window.location.href= '/editor.html?page='+window.location.href;
+    }
+    function goToMain(){
+      window.location.href = '/';
+    }
     function goToLogin() {
-      window.location.href = '/login';
+      window.location.href = '/login.html';
     }
     function goToRegister() {
-      window.location.href = '/register';
+      window.location.href = '/register.html';
     }
     function goToProfile() {
-      window.location.href = '/profile';
+      window.location.href = '/profile.html';
     }
