@@ -1,5 +1,6 @@
-package pl.szajsjem.autonet.DB;
+package pl.szajsjem.autonet.Services;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,24 +10,38 @@ public class Cache {
     static String cachePath = System.getenv("CACHE_PATH");
     public static void addPageCache(String path,String page){
         if(!path.startsWith("/wiki/"))return;
+        File file = new File(cachePath+path);
+        file.mkdirs();
+        if(file.isDirectory())
+            file.delete();
         try (
-                FileOutputStream outputStream = new FileOutputStream(cachePath+path);
+                FileOutputStream outputStream = new FileOutputStream(file);
         ) {
             outputStream.write(page.getBytes());
         }catch (IOException ignored) {
         }
     }
     public static void pageLog(String path, String page){
+        if(!path.startsWith("/wiki/"))return;
+        File file = new File(cachePath+"/log"+path);
+        file.mkdirs();
+        if(file.isDirectory())
+            file.delete();
         try (
-                FileOutputStream outputStream = new FileOutputStream(cachePath+"/log"+path,true);
+                FileOutputStream outputStream = new FileOutputStream(file,true);
         ) {
             outputStream.write(page.getBytes());
         }catch (IOException ignored) {
         }
     }
     public static String getPageCache(String path){
+        if(!path.startsWith("/wiki/"))return "";
+        File file = new File(cachePath+path);
+        file.mkdirs();
+        if(file.isDirectory())
+            file.delete();
         try (
-                FileInputStream inputStream = new FileInputStream(cachePath+path);
+                FileInputStream inputStream = new FileInputStream(file);
         ) {
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }catch (IOException ignored) {

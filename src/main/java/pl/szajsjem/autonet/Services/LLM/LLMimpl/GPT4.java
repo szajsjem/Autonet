@@ -1,11 +1,11 @@
-package pl.szajsjem.autonet.LLM.LLMimpl;
+package pl.szajsjem.autonet.Services.LLM.LLMimpl;
 
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.OpenAiService;
 import lombok.AllArgsConstructor;
-import pl.szajsjem.autonet.LLM.LLM;
+import pl.szajsjem.autonet.Services.LLM.LLM;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -64,9 +64,19 @@
     </style>
 </head>
 <body>
+<nav id="topNavbar">
+</nav>
 <script src="scripts.js"></script>
+<script>
+    updateNavbar();
+    const dataDiv = document.getElementById('datacontainer');
+    fetchData('/api/user', (userData) => {
+            dataDiv.innerHTML = JSON.stringify(userData.data);
+          });
+</script>
 <h2>Your data</h2>
 
+<div id="datacontainer"></div>
 
 </body>
 </html>

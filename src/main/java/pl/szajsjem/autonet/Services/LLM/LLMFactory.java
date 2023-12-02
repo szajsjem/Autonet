@@ -1,7 +1,7 @@
-package pl.szajsjem.autonet.LLM;
+package pl.szajsjem.autonet.Services.LLM;
 
-import pl.szajsjem.autonet.LLM.LLMimpl.GPT3d5;
-import pl.szajsjem.autonet.LLM.LLMimpl.GPT4;
+import pl.szajsjem.autonet.Services.LLM.LLMimpl.GPT3d5;
+import pl.szajsjem.autonet.Services.LLM.LLMimpl.GPT4;
 
 import com.theokanning.openai.service.OpenAiService;
 

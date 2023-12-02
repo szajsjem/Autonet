@@ -1,16 +1,12 @@
 package pl.szajsjem.autonet.Services;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import pl.szajsjem.autonet.DB.Cache;
 import pl.szajsjem.autonet.DB.DTO.PageRequest;
 import pl.szajsjem.autonet.DB.entity.Page;
 import pl.szajsjem.autonet.DB.jpa.PageRepository;
-import pl.szajsjem.autonet.LLM.LLM;
-import pl.szajsjem.autonet.LLM.LLMFactory;
+import pl.szajsjem.autonet.Services.LLM.LLM;
+import pl.szajsjem.autonet.Services.LLM.LLMFactory;
 
 import java.util.*;
 
@@ -22,6 +18,8 @@ public class PageCreationService {
     List<PageRequest> pagesToCreate = new ArrayList<>();
     public void addToQueue(PageRequest pageRequest) {
         synchronized (this) {
+            if(!thread.isAlive())
+                thread.start();
             for (PageRequest p:pagesToCreate){
                 if(Objects.equals(p.path, pageRequest.path))
                     return;
@@ -45,15 +43,10 @@ public class PageCreationService {
         LLM llm = LLMFactory.getLLM(pageRequest.model);
         assert llm != null;
         var path = pageRequest.path.replace(' ','-');
-        var splitusermessage = pageRequest.user.split("\\$\\$URL\\$\\$");
-        StringBuilder userMessage = new StringBuilder();
-        for(String s:splitusermessage) {
-            userMessage.append(s);
-            userMessage.append(path);
-        }
-        userMessage.replace(userMessage.lastIndexOf(path),userMessage.length(), "\nPlease start relative links with /wiki/(main topic)/(subtopic) and start your response with:\n<!DOCTYPE html>\n<html>\n<head>\n<title>(title)</title>\n</head>\n<body>\n");
+        String userMessage = pageRequest.user.replaceAll("\\$\\$URL\\$\\$",pageRequest.path)
+                +"\nPlease start relative links with /wiki/(main topic)/(subtopic) and start your response with:\n<!DOCTYPE html>\n<html>\n<head>\n<title>(title)</title>\n</head>\n<body>\n";
         try {
-            String wikiPage = llm.chat(new String[]{pageRequest.system,userMessage.toString()});
+            String wikiPage = llm.chat(new String[]{pageRequest.system,userMessage});
             String[] spl = wikiPage.split("<\\/head>\n<body>");
             if(spl.length!=2){
                 throw new Exception(wikiPage);
@@ -99,14 +92,14 @@ public class PageCreationService {
     });
 
     static final String navigation = """
-            <link rel="stylesheet" href="style.css">
+            <link rel="stylesheet" href="/style.css">
             </head>
             <body>
-            <script src="scripts.js"></script>
+            <nav id="topNavbar">
+            </nav>
+            <script src="/scripts.js"></script>
             <script>
                 updateNavbar();
             </script>
-            <nav id="topNavbar">
-            </nav>
             """;
 }

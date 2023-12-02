@@ -48,7 +48,7 @@
         if (loginStatus.ok === true) {
           fetchData('/api/user', (userData) => {
             navbar.innerHTML = `
-              <a id="logo_href" href="#" onclick="goToMain()"><img src="logo.png" id="logo_img"></a>
+              <a id="logo_href" href="#" onclick="goToMain()"><img src="/logo.png" id="logo_img"></a>
               <span>Welcome, ${userData.data.login}!</span>
               <button onclick="goToProfile()">Profile</button>
               <button onclick="logout()">Logout</button>
@@ -56,7 +56,7 @@
           });
         } else {
           navbar.innerHTML = `
-              <a id="logo_href" href="#" onclick="goToMain()"><img src="logo.png" id="logo_img"></a>
+              <a id="logo_href" href="#" onclick="goToMain()"><img src="/logo.png" id="logo_img"></a>
               <button onclick="goToLogin()">Login</button>
               <button onclick="goToRegister()">Register</button>
           ` + getgenpagebuttons();
@@ -68,7 +68,14 @@
             goToMain();
         });
     }
+    function searchWiki(event) {
+        event.preventDefault();
 
+        const form = document.getElementById('searchForm');
+        const path = form.search.value;
+
+        window.location.href= '/wiki/'+path;
+    }
     function loginUser(event) {
           event.preventDefault();
 
@@ -121,30 +128,74 @@
 
 
 
-    function requestPage(){
+    function requestPage() {
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
 
+        const data = {
+            page: urlParams.get('page')
+        };
+
+        fetchPost('/api/generatePage',data,result => {
+            const messageDiv = document.getElementById('loadingMessage');
+            if (result.ok === true) {
+                messageDiv.innerHTML = 'Tworzenie strony';
+            } else {
+                messageDiv.innerHTML = result.message;
+            }
+        });
     }
     function updatePage(){
 
     }
     function getgenpagebuttons(){
-        if(window.location.href.includes('/wiki/'))
+        if(window.location.href.includes('\/wiki'))
             return `
                     <button onclick="goToEdit()">Edit</button>
                     <button onclick="goToLogs()">Logs</button>
                     `;
-        return '';
+        if(window.location.href.includes('\/log'))
+            return `
+                    <button onclick="goToView()">View</button>
+                    `;
+        if(window.location.href.includes('\/editor.html'))
+            return `
+                    <button onclick="goToEView()">View</button>
+                    `;
+        return ``;
     }
 
 
 
 
     function goToGenerated(){
-        //while tru get isgenerated
-        //if gen goto /wiki/**
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const data = {
+            page: urlParams.get('page')
+        };
+        fetchPost('/api/isGenerated',data,result => {
+            const messageDiv = document.getElementById('loadingMessage');
+            if (result.ok === true) {
+                let ns = window.location.href;
+                ns.replace("/topic.html?search=","/wiki/");
+                window.location.href = ns;
+            } else {
+                if ( result.message !== null ){
+                    messageDiv.innerHTML = result.message;
+                }
+                else{
+                    setTimeout(goToGenerated,5E3);
+                }
+            }
+        });
+    }
+
+    function goToLogs(){
+        window.location.href= '/log'+window.location.pathname;
     }
     function goToEdit(){
-        window.location.href= '/editor.html?page='+window.location.href;
+        window.location.href= '/editor.html?page='+window.location.pathname;
     }
     function goToMain(){
       window.location.href = '/';

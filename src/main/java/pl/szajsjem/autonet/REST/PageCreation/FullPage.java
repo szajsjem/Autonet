@@ -17,9 +17,10 @@ import pl.szajsjem.autonet.DB.entity.User;
 import pl.szajsjem.autonet.DB.jpa.TokenRepository;
 import pl.szajsjem.autonet.DB.jpa.UserRepository;
 import pl.szajsjem.autonet.REST.Profile;
+import pl.szajsjem.autonet.Services.Cache;
 import pl.szajsjem.autonet.Services.PageCreationService;
 
-import static pl.szajsjem.autonet.DB.Cache.pageLog;
+import static pl.szajsjem.autonet.Services.Cache.pageLog;
 
 @Controller
 public class FullPage {
@@ -65,17 +66,19 @@ public class FullPage {
         pageCreationService.addToQueue(pageRequest);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Location", "/topic?page="+path);
+        headers.add("Location", "/topic.html?page="+path);
         return new ResponseEntity<String>(headers, HttpStatus.FOUND);
     }
 
     @GetMapping("/wiki/**")
     public ResponseEntity<String> getWikiPage(HttpServletRequest request) throws Exception {
         String path = request.getRequestURI();
+        String page = Cache.getPageCache(path);
+        if(page.length()>1)
+            return new ResponseEntity<>(page,HttpStatus.OK);
+        pageLog(path,"page starting generation");
         String key = request.getParameter("key");
-        var r = preparePage(path,key);
-        pageLog(path,r.toString());
-        return r;
+        return preparePage(path,key);
     }
 
 }

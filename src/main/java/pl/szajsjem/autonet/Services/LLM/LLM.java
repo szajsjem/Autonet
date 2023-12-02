@@ -1,4 +1,4 @@
-package pl.szajsjem.autonet.LLM;
+package pl.szajsjem.autonet.Services.LLM;
 
 public interface LLM {
     String completeText(String systemText, String retBegining);
