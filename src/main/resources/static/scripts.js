@@ -4,6 +4,11 @@
         .then(data => callback(data))
         .catch(error => console.error('Error:', error));
     }
+    function fetchRawData(url, callback) {
+          fetch(url)
+            .then(response => callback(response))
+            .catch(error => console.error('Error:', error));
+        }
     function fetchRawPost(url, callback){
         fetch(url, {
             method: 'POST'
@@ -32,6 +37,18 @@
         .then(data => callback(data))
         .catch(error => console.error('Error:', error));
     }
+    }
+    function fetchPut(url,data, callback) {
+      fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'text/html'
+        },
+        body: data
+        })
+        .then(response => response.json())
+        .then(data => callback(data))
+        .catch(error => console.error('Error:', error));
     }
     function fetchDelete(url, callback) {
       fetch(url, {
@@ -123,44 +140,199 @@
           });
         }
 
+    function updateProfile(event){
+        event.preventDefault();
+        const form = document.getElementById('registrationForm');
+        const pageGenSystemText = form.pageGenSystemText.value;
+        const pageGenUserText = form.pageGenUserText.value;
+        const selectedModel = form.selectedModel.value;
+
+        const data = {
+            login: username,
+            email: email,
+            password: password
+        };
 
 
+    }
+    function updateProfileF() {
+        const dataDiv = document.getElementById('datacontainer');
+        fetchData('/api/user', (userData) => {
+            const form = document.getElementById('profileForm');
+            const profileData = document.getElementById('profileForm');
+            if(userData.ok === true){
+                form.pageGenSystemText.value = userData.data.generationInstructions.pageGenSystemText;
+                form.pageGenUserText.value = userData.data.generationInstructions.pageGenUserText;
+                form.selectedModel.value = userData.data.generationInstructions.selectedModel;
+            }
+            dataDiv.innerHTML = JSON.stringify(userData.data);
+        });
+    }
 
-
-
-    function requestPage() {
+    var editor=null;
+    function updateEditor() {
+        editor = CKEDITOR.ClassicEditor.create(document.querySelector("#editor"), {
+                                        toolbar: {
+                                            items: [
+                                                'insertImage', 'mediaEmbed', 'link', '|',
+                                                'specialCharacters', 'horizontalLine ', 'blockQuote', 'pageBreak', '|',
+                                                'findAndReplace', 'selectAll', 'sourceEditing', '|',
+                                                'undo', 'redo',
+                                                '-',
+                                                'heading', '|',
+                                                'fontFamily', 'fontSize', '|',
+                                                'bold', 'italic', 'underline', '|',
+                                                'outdent', 'indent', 'alignment', '|',
+                                                'bulletedList', 'numberedList', '|'
+                                            ],
+                                            shouldNotGroupWhenFull: true
+                                        },
+                                        language: 'pl',
+                                        list: {
+                                            properties: {
+                                                styles: true,
+                                                startIndex: true,
+                                                reversed: true
+                                            }
+                                        },
+                                        heading: {
+                                            options: [
+                                                {model: 'paragraph', title: 'Akapit', class: 'ck-heading_paragraph'},
+                                                {model: 'heading1', view: 'h1', title: 'Nagłówek 1', class: 'ck-heading_heading1'},
+                                                {model: 'heading2', view: 'h2', title: 'Nagłówek 2', class: 'ck-heading_heading2'},
+                                                {model: 'heading3', view: 'h3', title: 'Nagłówek 3', class: 'ck-heading_heading3'},
+                                                {model: 'heading4', view: 'h4', title: 'Nagłówek 4', class: 'ck-heading_heading4'},
+                                                {model: 'heading5', view: 'h5', title: 'Nagłówek 5', class: 'ck-heading_heading5'},
+                                                {model: 'heading6', view: 'h6', title: 'Nagłówek 6', class: 'ck-heading_heading6'}
+                                            ]
+                                        },
+                                        placeholder: 'Opis',
+                                        fontFamily: {
+                                            options: [
+                                                'default',
+                                                'Arial, Helvetica, sans-serif',
+                                                'Courier New, Courier, monospace',
+                                                'Georgia, serif',
+                                                'Lucida Sans Unicode, Lucida Grande, sans-serif',
+                                                'Tahoma, Geneva, sans-serif',
+                                                'Times New Roman, Times, serif',
+                                                'Trebuchet MS, Helvetica, sans-serif',
+                                                'Verdana, Geneva, sans-serif'
+                                            ],
+                                            supportAllValues: true
+                                        },
+                                        fontSize: {
+                                            options: [9, 10, 11, 12, 13, 14, 16, 18, 20, 24, 32, 48],
+                                            supportAllValues: true
+                                        },
+                                        htmlSupport: {
+                                            allow: [
+                                                {
+                                                    name: /.*/,
+                                                    attributes: true,
+                                                    classes: true,
+                                                    styles: true
+                                                }
+                                            ]
+                                        },
+                                        htmlEmbed: {
+                                            showPreviews: true
+                                        },
+                                        link: {
+                                            decorators: {
+                                                addTargetToExternalLinks: true,
+                                                defaultProtocol: 'https://',
+                                                toggleDownloadable: {
+                                                    mode: 'manual',
+                                                    label: 'Downloadable',
+                                                    attributes: {
+                                                        download: 'file'
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        mention: {
+                                            feeds: [
+                                                {
+                                                    marker: '@',
+                                                    feed: [
+                                                        '@apple', '@bears', '@brownie', '@cake', '@cake', '@candy', '@canes', '@chocolate', '@cookie', '@cotton', '@cream',
+                                                        '@cupcake', '@danish', '@donut', '@dragée', '@fruitcake', '@gingerbread', '@gummi', '@ice', '@jelly-o',
+                                                        '@liquorice', '@macaroon', '@marzipan', '@oat', '@pie', '@plum', '@pudding', '@sesame', '@snaps', '@soufflé',
+                                                        '@sugar', '@sweet', '@topping', '@wafer'
+                                                    ],
+                                                    minimumCharacters: 1
+                                                }
+                                            ]
+                                        },
+                                        removePlugins: [
+                                            'CKBox',
+                                            'CKFinder',
+                                            'EasyImage',
+                                            'RealTimeCollaborativeComments',
+                                            'RealTimeCollaborativeTrackChanges',
+                                            'RealTimeCollaborativeRevisionHistory',
+                                            'PresenceList',
+                                            'Comments',
+                                            'TrackChanges',
+                                            'TrackChangesData',
+                                            'RevisionHistory',
+                                            'Pagination',
+                                            'WProofreader',
+                                            'MathType',
+                                            'SlashCommand',
+                                            'Template',
+                                            'DocumentOutline',
+                                            'FormatPainter',
+                                            'TableOfContents'
+                                        ]
+                                    });
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
-
         const data = {
             page: urlParams.get('page')
         };
-
-        fetchPost('/api/generatePage',data,result => {
-            const messageDiv = document.getElementById('loadingMessage');
+        fetchPost('/api/isGenerated',data,result => {
             if (result.ok === true) {
-                messageDiv.innerHTML = 'Tworzenie strony';
-            } else {
-                messageDiv.innerHTML = result.message;
+                fetchRawData(data.page,resp =>{
+                    resp.text().then(text=>{
+                        editor.then( editorInstance => {
+                            editorInstance.setData(text);
+                        });
+                    })
+                });
             }
         });
     }
-    function updatePage(){
 
+    function updatePage(){
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const path = '/edit' + urlParams.get('page').slice(5);
+        editor.then( editorInstance => {
+            const data = editorInstance.getData();
+            fetchPut(path,data,resp =>{
+                if(resp.ok===true){
+                    //success
+                }
+            })
+        });
     }
+
+
     function getgenpagebuttons(){
-        if(window.location.href.includes('\/wiki'))
+        if(window.location.href.includes('\/editor.html'))
             return `
-                    <button onclick="goToEdit()">Edit</button>
-                    <button onclick="goToLogs()">Logs</button>
+                    <button onclick="goToEView()">View</button>
                     `;
         if(window.location.href.includes('\/log'))
             return `
                     <button onclick="goToView()">View</button>
                     `;
-        if(window.location.href.includes('\/editor.html'))
+        if(window.location.href.includes('\/wiki'))
             return `
-                    <button onclick="goToEView()">View</button>
+                    <button onclick="goToEdit()">Edit</button>
+                    <button onclick="goToLogs()">Logs</button>
                     `;
         return ``;
     }
@@ -177,9 +349,7 @@
         fetchPost('/api/isGenerated',data,result => {
             const messageDiv = document.getElementById('loadingMessage');
             if (result.ok === true) {
-                let ns = window.location.href;
-                ns.replace("/topic.html?search=","/wiki/");
-                window.location.href = ns;
+                window.location.href = data.page;
             } else {
                 if ( result.message !== null ){
                     messageDiv.innerHTML = result.message;
@@ -197,6 +367,16 @@
     function goToEdit(){
         window.location.href= '/editor.html?page='+window.location.pathname;
     }
+    function goToEView(){
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const path = urlParams.get('page');
+        window.location.href = path;
+    }
+    function goToView() {
+        window.location.href = window.location.pathname.slice(4);
+    }
+
     function goToMain(){
       window.location.href = '/';
     }
@@ -209,3 +389,4 @@
     function goToProfile() {
       window.location.href = '/profile.html';
     }
+

@@ -7,20 +7,24 @@ import org.springframework.web.bind.annotation.RestController;
 import pl.szajsjem.autonet.DB.DTO.RestResponse;
 import pl.szajsjem.autonet.DB.jpa.PageRepository;
 
+import java.util.Map;
+
 @RestController
 public class Page {
     @Autowired
     PageRepository pages;
 
     @PostMapping("/api/isGenerated")
-    RestResponse pageStatus(@RequestBody String page){
-        var t = pages.findByUrl(page);
-        if(t.isGenerated())
-            return new RestResponse(true,null,null);
-        else
-            if(t.getErrorMessage()!=null)
-                return new RestResponse(false,"error",t.getErrorMessage());
-        return new RestResponse(false, null, "Page is in construction");
+    RestResponse pageStatus(@RequestBody Map<String,String> map){
+        if(!map.containsKey("page"))return new RestResponse(false, null, "Invalid request");
+        var t = pages.findByUrl(map.get("page"));
+        if(t!=null) {
+            if (t.isGenerated())
+                return new RestResponse(true, null, null);
+            else if (t.getErrorMessage() != null)
+                return new RestResponse(false, null, t.getErrorMessage());
+        }
+        return new RestResponse(false, null, null);
     }
 
 }

@@ -14,8 +14,10 @@ import pl.szajsjem.autonet.DB.DTO.PageRequest;
 import pl.szajsjem.autonet.DB.entity.GenInstructions;
 import pl.szajsjem.autonet.DB.entity.Token;
 import pl.szajsjem.autonet.DB.entity.User;
+import pl.szajsjem.autonet.DB.jpa.PageRepository;
 import pl.szajsjem.autonet.DB.jpa.TokenRepository;
 import pl.szajsjem.autonet.DB.jpa.UserRepository;
+import pl.szajsjem.autonet.DB.entity.Page;
 import pl.szajsjem.autonet.REST.Profile;
 import pl.szajsjem.autonet.Services.Cache;
 import pl.szajsjem.autonet.Services.PageCreationService;
@@ -28,6 +30,8 @@ public class FullPage {
     private UserRepository users;
     @Autowired
     private TokenRepository tokens;
+    @Autowired
+    private PageRepository pages;
     @Autowired
     private PageCreationService pageCreationService;
 
@@ -76,9 +80,27 @@ public class FullPage {
         String page = Cache.getPageCache(path);
         if(page.length()>1)
             return new ResponseEntity<>(page,HttpStatus.OK);
-        pageLog(path,"page starting generation");
+        Page p = pages.findByUrl(path);
+        if(p==null) {
+            Page page1 = new Page(0L, path, false, null);
+            pages.save(page1);
+        }
+        else{
+            p.setGenerated(false);
+            p.setErrorMessage(null);
+            pages.save(p);
+        }
+        pageLog(path,"page starting generation\n");
         String key = request.getParameter("key");
         return preparePage(path,key);
+    }
+
+
+    @GetMapping("/log/**")
+    public ResponseEntity<String> getLogPage(HttpServletRequest request) throws Exception {
+        String path = request.getRequestURI();
+        String page = Cache.getPageLog(path);
+        return new ResponseEntity<>(page,HttpStatus.OK);
     }
 
 }

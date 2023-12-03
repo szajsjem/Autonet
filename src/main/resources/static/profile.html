@@ -1,82 +1,33 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
+    <link rel="stylesheet" href="style.css">
     <meta charset="UTF-8">
-    <title>Registration Form</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-        }
-
-        h2 {
-            background-color: #333;
-            color: #fff;
-            padding: 20px;
-            margin: 0;
-        }
-
-        form {
-            background-color: #fff;
-            border: 1px solid #ccc;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin: 20px auto;
-            max-width: 300px;
-        }
-
-        label {
-            display: block;
-            margin-top: 10px;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        button[type="submit"] {
-            background-color: #333;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            padding: 10px 20px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #555;
-        }
-
-        #registrationMessage {
-            margin-top: 10px;
-        }
-  <link rel="stylesheet" href="style.css">
-    </style>
+    <title>Profile</title>
 </head>
 <body>
 <nav id="topNavbar">
 </nav>
-<script src="scripts.js"></script>
-<script>
-    updateNavbar();
-    const dataDiv = document.getElementById('datacontainer');
-    fetchData('/api/user', (userData) => {
-            dataDiv.innerHTML = JSON.stringify(userData.data);
-          });
-</script>
+<script src="/scripts.js"></script>
 <h2>Your data</h2>
 
 <div id="datacontainer"></div>
+<form id="profileForm" onsubmit="updateProfile(event)">
+    <label for="pageGenSystemText">pageGenSystemText:</label>
+    <input type="text" id="pageGenSystemText" name="pageGenSystemText" required><br>
 
+    <label for="pageGenUserText">pageGenUserText:</label>
+    <input type="text" id="pageGenUserText" name="pageGenUserText" required><br>
+
+    <label for="selectedModel">selectedModel:</label>
+    <input type="text" id="selectedModel" name="selectedModel" required><br>
+
+    <button type="submit">Update</button>
+</form>
+
+<script>
+    updateNavbar();
+    updateProfileF();
+</script>
 </body>
 </html>

@@ -53,6 +53,7 @@ public class PageCreationService {
             }
             wikiPage = spl[0]+navigation+spl[1];
             Cache.addPageCache(path,wikiPage);
+            Cache.pageLog(path,wikiPage);
             Page page = pageRepository.findByUrl(pageRequest.path);
             if(page == null) {
                 page = new Page(0L, pageRequest.path, true, null);

@@ -48,5 +48,18 @@ public class Cache {
             return "";
         }
     }
+    public static String getPageLog(String path){
+        File file = new File(cachePath+path);
+        file.mkdirs();
+        if(file.isDirectory())
+            file.delete();
+        try (
+                FileInputStream inputStream = new FileInputStream(file);
+        ) {
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }catch (IOException ignored) {
+            return "";
+        }
+    }
 
 }

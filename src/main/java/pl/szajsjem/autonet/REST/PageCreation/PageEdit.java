@@ -63,7 +63,7 @@ public class PageEdit {
         if (u == null)
             return new ResponseEntity<>("{\"ok\":false}", HttpStatus.OK);
 
-        Cache.addPageCache(p,body);
+        Cache.addPageCache(p,"<head><link rel=\"stylesheet\" href=\"/style.css\"></head>"+body);
         Cache.pageLog(p,"\nPage changed by user with id:"+u.getId()+"\n"+body);
         return new ResponseEntity<>("{\"ok\":true}", HttpStatus.OK);
     }
