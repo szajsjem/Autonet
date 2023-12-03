@@ -156,16 +156,17 @@
 
     }
     function updateProfileF() {
-        const dataDiv = document.getElementById('datacontainer');
         fetchData('/api/user', (userData) => {
             const form = document.getElementById('profileForm');
-            const profileData = document.getElementById('profileForm');
             if(userData.ok === true){
                 form.pageGenSystemText.value = userData.data.generationInstructions.pageGenSystemText;
                 form.pageGenUserText.value = userData.data.generationInstructions.pageGenUserText;
                 form.selectedModel.value = userData.data.generationInstructions.selectedModel;
             }
-            dataDiv.innerHTML = JSON.stringify(userData.data);
+            const dataDiv = document.getElementById('login');
+            dataDiv.innerHTML = "Login:"+userData.data.login;
+            const data2Div = document.getElementById('email');
+            data2Div.innerHTML = "Email:"+userData.data.email;
         });
     }
 
@@ -312,8 +313,12 @@
         editor.then( editorInstance => {
             const data = editorInstance.getData();
             fetchPut(path,data,resp =>{
+                const dataDiv = document.getElementById('saveMessage');
                 if(resp.ok===true){
-                    //success
+                    dataDiv.innerHTML = 'Pomyślnie zapisano';
+                }
+                else{
+                    dataDiv.innerHTML = 'Wystąpił problem z zapisaniem';
                 }
             })
         });
