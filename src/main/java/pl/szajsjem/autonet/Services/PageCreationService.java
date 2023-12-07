@@ -9,20 +9,21 @@ import pl.szajsjem.autonet.Services.LLM.LLM;
 import pl.szajsjem.autonet.Services.LLM.LLMFactory;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Controller
 public class PageCreationService {
-
     @Autowired
     PageRepository pageRepository;
     List<PageRequest> pagesToCreate = new ArrayList<>();
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     public void addToQueue(PageRequest pageRequest) {
         synchronized (this) {
-            if(!thread.isAlive())
-                thread.start();
-            for (PageRequest p:pagesToCreate){
-                if(Objects.equals(p.path, pageRequest.path))
+            for (PageRequest p : pagesToCreate) {
+                if (Objects.equals(p.path, pageRequest.path)) {
                     return;
+                }
             }
             Page page = pageRepository.findByUrl(pageRequest.path);
             pagesToCreate.add(pageRequest);
@@ -30,13 +31,24 @@ public class PageCreationService {
     }
     private PageRequest getNext() {
         synchronized (this) {
-            if(pagesToCreate.size()==0)return null;
-            PageRequest p = pagesToCreate.get(0);
-            pagesToCreate.remove(0);
-            return p;
+            return pagesToCreate.isEmpty() ? null : pagesToCreate.remove(0);
         }
     }
 
+    private void processPages() {
+        while (true) {
+            PageRequest pageRequest = getNext();
+            if (pageRequest != null) {
+                preparePage(pageRequest);
+            } else {
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+    }
 
 
     public void preparePage(PageRequest pageRequest) {
@@ -73,24 +85,9 @@ public class PageCreationService {
         }
     }
 
-    Thread thread =new Thread(new Runnable() {
-        @Override
-        public void run() {
-            while (true){
-                PageRequest pageRequest = getNext();
-                if(pageRequest!=null){
-                    preparePage(pageRequest);
-                }
-                else{
-                    try {
-                        this.wait(1);
-                    }
-                    catch (Exception ignored){
-                    }
-                }
-            }
-        }
-    });
+    {
+        executorService.submit(this::processPages);
+    }
 
     static final String navigation = """
             <link rel="stylesheet" href="/style.css">

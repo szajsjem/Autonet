@@ -89,9 +89,9 @@
         event.preventDefault();
 
         const form = document.getElementById('searchForm');
-        const path = form.search.value;
+        var path = form.search.value;
 
-        window.location.href= '/wiki/'+path;
+        window.location.href= '/wiki/'+path.split(' ').join('_') + '.html';
     }
     function loginUser(event) {
           event.preventDefault();
@@ -153,7 +153,14 @@
             password: password
         };
 
-
+        fetchPut('/api/user', data, (resp)=>{
+            if(resp.ok === true){
+                messageDiv.innerHTML = 'Update successful.';
+            }
+            else{
+                messageDiv.innerHTML = `Update failed: ${resp.errorMessage}`;
+            }
+        });
     }
     function updateProfileF() {
         fetchData('/api/user', (userData) => {

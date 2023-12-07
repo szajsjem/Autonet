@@ -45,7 +45,7 @@ public class Login {
         else if (map.containsKey("email")) {
             u = users.findByEmail(map.get("email"));
         }
-        if (u == null) return "{\"ok\":false,\"data\":{\"message\":\"missing username or email\"}}";
+        if (u == null) return "{\"ok\":false,\"data\":{\"message\":\"wrong username or email\"}}";
         if(!u.getPassword().equals(passhash(u.getSalt(),map.get("password"))))return "{\"ok\":false,\"data\":{\"message\":\"invalid password\"}}";
         String token = randomString(40);
         while (tokens.findByToken(token) != null) {

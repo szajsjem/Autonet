@@ -48,20 +48,10 @@ public class Profile {
                     Feel free to use hyperlinks, sections, and references to enhance the authenticity of the generated content.
                     Keep the links relative and with this structure "/wiki/(topic)/(subtopic)";
             """;
-    /*"""
-            Given the URL, please perform the following tasks:
-            1. *Generate* the page that is supposed to be on this link, structured like wikipedia and fill it's contents, mainly:short summary, chapters about key points, links to sources, links to topics that are connected to this page with relative lings /wiki/(topic).
-            2. *Identify Relevant Links:* As you create the summary, identify key concepts and topics that are extensively discussed on the page. For each of these, find relevant internal links (links to other pages within the same domain) that provide additional context or further information.
-            3. *Insert Contextual Links:* Embed these links seamlessly into the summary text where they naturally fit. The anchor text for each link should be informative and indicate the linked page's content, maintaining the coherence and context of the original page.
-            4. *Maintain Original Context:* Be careful to preserve the original context of the page. Do not insert links that could mislead or take the reader on a tangent unrelated to the primary focus of the original content. Keep the user on /wiki/(topics) path.
-            """;*/
     @Getter
     final static String defaultUserRequest= """
             Generate a Wikipedia-style webpage for the following path : "$$URL$$".
             """;
-    /*"""
-            AI, I am providing you with the full URL of a webpage: $$URL$$. Based on your knowledge up to 2023, please generate a page that looks that it is supposed to be there. Ensure that the page remains coherent and flows naturally with the inserted hyperlinks.
-            """;*/
 
     @GetMapping("/api/Defaults")
     String defaultStrings(){
