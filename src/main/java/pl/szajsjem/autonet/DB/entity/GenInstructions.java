@@ -13,9 +13,9 @@ public class GenInstructions {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id ;
     @Column(columnDefinition="TEXT")
-    private String SelectedModel;
+    private String selectedModel;
     @Column(columnDefinition="TEXT")
-    private String PageGenSystemText;
+    private String pageGenSystemText;
     @Column(columnDefinition="TEXT")
-    private String PageGenUserText;
+    private String pageGenUserText;
 }

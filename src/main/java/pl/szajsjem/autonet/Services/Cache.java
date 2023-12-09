@@ -14,12 +14,16 @@ public class Cache {
         file.mkdirs();
         if(file.isDirectory())
             file.delete();
-        try (
-                FileOutputStream outputStream = new FileOutputStream(file);
-        ) {
-            outputStream.write(page.getBytes());
-        }catch (IOException ignored) {
+        if(page==null){
+            file.delete();
         }
+        else
+            try (
+                    FileOutputStream outputStream = new FileOutputStream(file);
+            ) {
+                outputStream.write(page.getBytes());
+            }catch (IOException ignored) {
+            }
     }
     public static void pageLog(String path, String page){
         if(!path.startsWith("/wiki/"))return;

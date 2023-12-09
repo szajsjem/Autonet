@@ -142,15 +142,15 @@
 
     function updateProfile(event){
         event.preventDefault();
-        const form = document.getElementById('registrationForm');
+        const form = document.getElementById('profileForm');
         const pageGenSystemText = form.pageGenSystemText.value;
         const pageGenUserText = form.pageGenUserText.value;
         const selectedModel = form.selectedModel.value;
 
         const data = {
-            login: username,
-            email: email,
-            password: password
+            pageGenSystemText: pageGenSystemText,
+            pageGenUserText: pageGenUserText,
+            selectedModel: selectedModel
         };
 
         fetchPut('/api/user', data, (resp)=>{

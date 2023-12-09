@@ -13,6 +13,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import pl.szajsjem.autonet.DB.entity.GenInstructions;
 import pl.szajsjem.autonet.DB.entity.Token;
 import pl.szajsjem.autonet.DB.entity.User;
+import pl.szajsjem.autonet.DB.jpa.GenInstructionsRepository;
 import pl.szajsjem.autonet.DB.jpa.TokenRepository;
 import pl.szajsjem.autonet.DB.jpa.UserRepository;
 
@@ -36,6 +37,8 @@ public class Profile {
     private UserRepository users;
     @Autowired
     private TokenRepository tokens;
+    @Autowired
+    private GenInstructionsRepository genInstructionsRepository;
 
     @Getter
     final static String defaultModel = "GPT3.5";
@@ -128,6 +131,11 @@ public class Profile {
                 g.setPageGenUserText(updated.getPageGenUserText());
                 g.setPageGenSystemText(updated.getPageGenSystemText());
                 g.setSelectedModel(updated.getSelectedModel());
+            }
+            else{
+                GenInstructions n = new GenInstructions(0L,updated.getSelectedModel(),updated.getPageGenSystemText(),updated.getPageGenUserText());
+                g = genInstructionsRepository.save(n);
+                u.setGenerationInstructions(g);
             }
             users.save(u);
             return new ResponseEntity<>("{\"ok\":true," +
