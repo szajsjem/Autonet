@@ -91,6 +91,7 @@ public class PageCreationService {
 
     static final String navigation = """
             <link rel="stylesheet" href="/style.css">
+            <meta charset="UTF-8">
             </head>
             <body>
             <nav id="topNavbar">

@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import pl.szajsjem.autonet.DB.DTO.LoginRequest;
+import pl.szajsjem.autonet.DB.DTO.RestResponse;
 import pl.szajsjem.autonet.DB.entity.Token;
 import pl.szajsjem.autonet.DB.entity.User;
 import pl.szajsjem.autonet.DB.jpa.TokenRepository;
@@ -34,19 +36,19 @@ public class Login {
     private TokenRepository tokens;
 
     @PostMapping("/api/user/login")
-    String login(@RequestBody Map<String,String> map) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    RestResponse login(@RequestBody LoginRequest loginRequest) throws NoSuchAlgorithmException, InvalidKeySpecException {
         User u = null;
-        if(!map.containsKey("password"))return "{\"ok\":false,\"data\":{\"message\":\"missing password\"}}";
-        if (map.containsKey("login")) {
-            u = users.findByLogin(map.get("login"));
+        if(loginRequest.password!=null)return new RestResponse(false,null,"Missing password");
+        if (loginRequest.login!=null) {
+            u = users.findByLogin(loginRequest.login);
             if (u == null)
-                u = users.findByEmail(map.get("login"));
+                u = users.findByEmail(loginRequest.login);
         }
-        else if (map.containsKey("email")) {
-            u = users.findByEmail(map.get("email"));
+        else if (loginRequest.email!=null) {
+            u = users.findByEmail(loginRequest.email);
         }
-        if (u == null) return "{\"ok\":false,\"data\":{\"message\":\"wrong username or email\"}}";
-        if(!u.getPassword().equals(passhash(u.getSalt(),map.get("password"))))return "{\"ok\":false,\"data\":{\"message\":\"invalid password\"}}";
+        if (u == null) return new RestResponse(false,null,"Wrong username or password");
+        if(!u.getPassword().equals(passhash(u.getSalt(),loginRequest.password)))return new RestResponse(false,null,"Wrong password");;
         String token = randomString(40);
         while (tokens.findByToken(token) != null) {
             token = randomString(40);
@@ -57,7 +59,7 @@ public class Login {
         HttpSession session = attr.getRequest().getSession();
         session.setAttribute("token", token);
 
-        return "{\"ok\":true,\"data\":{\"token\":\""+token+"\"}}";
+        return new RestResponse(true,token,null);
     }
     @Transactional
     @DeleteMapping("/api/user/logout")

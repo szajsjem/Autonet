@@ -34,7 +34,7 @@ public class Cache {
         try (
                 FileOutputStream outputStream = new FileOutputStream(file,true);
         ) {
-            outputStream.write(page.getBytes());
+            outputStream.write(page.getBytes(StandardCharsets.UTF_8));
         }catch (IOException ignored) {
         }
     }

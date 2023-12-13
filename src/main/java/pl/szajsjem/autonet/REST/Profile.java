@@ -49,7 +49,7 @@ public class Profile {
                     Your goal is to respond to user requests for information by generating web pages with relevant content.
                     Your responses should be coherent, factually accurate, and presented in a style similar to Wikipedia articles.
                     Feel free to use hyperlinks, sections, and references to enhance the authenticity of the generated content.
-                    Keep the links relative and with this structure "/wiki/(topic)/(subtopic)";
+                    Keep the links relative and with this structure "/wiki/(topic)/(subtopic).html" with "_" instead of spaces.
             """;
     @Getter
     final static String defaultUserRequest= """
